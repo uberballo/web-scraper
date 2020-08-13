@@ -21,11 +21,11 @@ func Scrape(url string) {
 }
 
 func scrapeData(url, suffix string) {
+	//var res []string
 	stockUrls := findElements(url, `.OMXH-list`, elements, collectHrefElements)
-	for _, i := range stockUrls {
-		fmt.Println(i)
-	}
-
+	t := baseUrl + stockUrls[0]
+	test := findElements(t, `.list-item-wrapper`, `.stock-list-column > span, .stock-list-column > div > h5 > span`, collectAll)
+	fmt.Println(test)
 }
 
 func visible(url, element string) error {
@@ -50,6 +50,16 @@ func collectHrefElements(nodes []*cdp.Node) []string {
 	var res []string
 	for _, i := range nodes {
 		res = append(res, i.AttributeValue("href")+"/tilinpaatos")
+	}
+	return res
+}
+
+func collectAll(nodes []*cdp.Node) []string {
+	var res []string
+	for _, i := range nodes {
+		for _, j := range i.Children {
+			res = append(res, j.NodeValue)
+		}
 	}
 	return res
 }
