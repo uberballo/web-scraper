@@ -36,7 +36,22 @@ func scrapeData(url, suffix string) {
 	childElement = os.Getenv("CHILD_ELEMENT")
 	t := baseURL + stockUrls[0]
 	test := findElements(t, childContainer, childElement, collectAll)
-	fmt.Println(test)
+	result := splitList(test)
+	fmt.Println(result)
+}
+
+func splitList(list []string) [][]string {
+	var res [][]string
+	var tempSlice []string
+	for i := 0; i < len(list); i++ {
+		tempSlice = append(tempSlice, list[i])
+		if (i+1)%6 == 0 {
+			res = append(res, tempSlice)
+			tempSlice = nil
+		}
+
+	}
+	return res
 }
 
 func visible(url, element string) error {
@@ -59,8 +74,8 @@ func visible(url, element string) error {
 
 func collectHrefElements(nodes []*cdp.Node) []string {
 	var res []string
-	for _, i := range nodes {
-		res = append(res, i.AttributeValue("href")+"/tilinpaatos")
+	for _, n := range nodes {
+		res = append(res, n.AttributeValue("href")+"/tilinpaatos")
 	}
 	return res
 }
