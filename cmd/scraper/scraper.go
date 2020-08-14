@@ -41,7 +41,7 @@ func scrapeData(url string) [][][]string {
 	scrapedData := scrapeUrls(shortList, baseURL, childContainer, childElement)
 
 	for _, n := range scrapedData {
-		res = append(res, util.SplitList(n))
+		res = append(res, util.SplitList(n, 6))
 	}
 	return res
 }
