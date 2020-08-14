@@ -1,4 +1,4 @@
-module web-scraper
+module github.com/uberballo/web-scraper
 
 go 1.13
 

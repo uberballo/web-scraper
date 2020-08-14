@@ -2,7 +2,8 @@ package main
 
 import (
 	"os"
-	"web-scraper/cmd/scraper"
+
+	"github.com/uberballo/web-scraper/cmd/scraper"
 
 	"github.com/joho/godotenv"
 )

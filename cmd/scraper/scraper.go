@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"web-scraper/cmd/util"
+	"github.com/uberballo/web-scraper/cmd/util"
 
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
