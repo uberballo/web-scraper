@@ -18,7 +18,6 @@ var mainElement string
 var childContainer string
 var childElement string
 
-//class["list-item-header routeless"]
 func Scrape(url string) {
 	fmt.Println(scrapeData(url, ""))
 }
@@ -33,15 +32,14 @@ func scrapeData(url, suffix string) [][][]string {
 	childElement = os.Getenv("CHILD_ELEMENT")
 
 	suffixUrls := appendSuffix(urls, "/tilinpaatos")
-	shortList := suffixUrls[:5]
+	workingUrls := prependPrefix(suffixUrls, baseURL)
+	shortList := workingUrls[:5]
 
-	for _, suffix := range shortList {
-		singleStockURL := baseURL + suffix
-		stockInformation := findElements(singleStockURL, childContainer, childElement, collectAll)
-		splittedStockInformation := splitList(stockInformation)
-		res = append(res, splittedStockInformation)
+	scrapedData := scrapeUrls(shortList, baseURL, childContainer, childElement)
+
+	for _, n := range scrapedData {
+		res = append(res, splitList(n))
 	}
-
 	return res
 }
 
@@ -51,6 +49,15 @@ func scrapeWebsite(url string) []string {
 	mainElement = os.Getenv("MAIN_ELEMENT")
 
 	res = findElements(url, mainContainer, mainElement, collectHrefElements)
+	return res
+}
+
+func scrapeUrls(list []string, baseURL, childContainer, childElement string) [][]string {
+	var res [][]string
+	for _, siteURL := range list {
+		stockInformation := findElements(siteURL, childContainer, childElement, collectAll)
+		res = append(res, stockInformation)
+	}
 	return res
 }
 
@@ -92,6 +99,15 @@ func appendSuffix(list []string, suffix string) []string {
 		res = append(res, n+suffix)
 	}
 	return res
+}
+
+func prependPrefix(list []string, prefix string) []string {
+	var res []string
+	for _, n := range list {
+		res = append(res, prefix+n)
+	}
+	return res
+
 }
 
 func collectHrefElements(nodes []*cdp.Node) []string {
