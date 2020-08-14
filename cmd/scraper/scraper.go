@@ -26,7 +26,7 @@ func Scrape(url string) [][][]string {
 }
 
 func scrapeData(url string) [][][]string {
-	var res [][][]string
+	var stocksKeyFigures [][][]string
 
 	urls := scrapeWebsite(url)
 
@@ -42,9 +42,9 @@ func scrapeData(url string) [][][]string {
 	scrapedData := scrapeUrls(shortList, baseURL, childContainer, childElement)
 
 	for _, n := range scrapedData {
-		res = append(res, util.SplitList(n, 6))
+		stocksKeyFigures = append(stocksKeyFigures, util.SplitList(n, 6))
 	}
-	return res
+	return stocksKeyFigures
 }
 
 func scrapeWebsite(url string) []string {
