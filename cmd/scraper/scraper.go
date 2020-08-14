@@ -20,24 +20,29 @@ var childElement string
 
 //class["list-item-header routeless"]
 func Scrape(url string) {
-	scrapeData(url, "")
+	fmt.Println(scrapeData(url, ""))
 }
 
-func scrapeData(url, suffix string) {
+func scrapeData(url, suffix string) [][][]string {
 	mainContainer = os.Getenv("MAIN_CONTAINER")
 	mainElement = os.Getenv("MAIN_ELEMENT")
 
-	//var res []string
 	stockUrls := findElements(url, mainContainer, mainElement, collectHrefElements)
+	suffixStockUrls := appendSuffix(stockUrls, "/tilinpaatos")
 
-	//Fetch one stocks information
 	baseURL = os.Getenv("BASE_URL")
 	childContainer = os.Getenv("CHILD_CONTAINER")
 	childElement = os.Getenv("CHILD_ELEMENT")
-	t := baseURL + stockUrls[0]
-	test := findElements(t, childContainer, childElement, collectAll)
-	result := splitList(test)
-	fmt.Println(result)
+	var res [][][]string
+
+	for _, suffix := range suffixStockUrls {
+		singleStockURL := baseURL + suffix
+		stockInformation := findElements(singleStockURL, childContainer, childElement, collectAll)
+		splittedStockInformation := splitList(stockInformation)
+		res = append(res, splittedStockInformation)
+	}
+
+	return res
 }
 
 func splitList(list []string) [][]string {
@@ -72,10 +77,18 @@ func visible(url, element string) error {
 	return err
 }
 
+func appendSuffix(list []string, suffix string) []string {
+	var res []string
+	for _, n := range list {
+		res = append(res, n+suffix)
+	}
+	return res
+}
+
 func collectHrefElements(nodes []*cdp.Node) []string {
 	var res []string
 	for _, n := range nodes {
-		res = append(res, n.AttributeValue("href")+"/tilinpaatos")
+		res = append(res, n.AttributeValue("href"))
 	}
 	return res
 }
