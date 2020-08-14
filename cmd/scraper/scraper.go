@@ -2,7 +2,6 @@ package scraper
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -21,8 +20,9 @@ var childElement string
 var suffix string
 
 //Scrape finds data from the given url
-func Scrape(url string) {
-	fmt.Println(scrapeData(url))
+func Scrape(url string) [][][]string {
+	res := scrapeData(url)
+	return res
 }
 
 func scrapeData(url string) [][][]string {
