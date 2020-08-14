@@ -1,7 +1,14 @@
 package main
 
-import "web-scraper/cmd/scraper"
+import (
+	"os"
+	"web-scraper/cmd/scraper"
+
+	"github.com/joho/godotenv"
+)
 
 func main() {
-	scraper.Scrape("https://www.kauppalehti.fi/porssi/kurssit/XHEL")
+	godotenv.Load(".env")
+	url := os.Getenv("MAIN_URL")
+	scraper.Scrape(url)
 }

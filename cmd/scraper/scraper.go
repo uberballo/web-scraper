@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/chromedp/cdproto/cdp"
@@ -11,9 +12,11 @@ import (
 )
 
 var testSuffix string = "porssi/porssikurssit/osake/NOKIA/tilinpaatos"
-var baseUrl string = "https://www.kauppalehti.fi"
-var url string = "https://www.kauppalehti.fi/porssi/kurssit/XHEL"
-var elements string = `div[class="list-striped mb-1"] > div > a`
+var baseURL string
+var mainContainer string
+var mainElement string
+var childContainer string
+var childElement string
 
 //class["list-item-header routeless"]
 func Scrape(url string) {
@@ -21,10 +24,18 @@ func Scrape(url string) {
 }
 
 func scrapeData(url, suffix string) {
+	mainContainer = os.Getenv("MAIN_CONTAINER")
+	mainElement = os.Getenv("MAIN_ELEMENT")
+
 	//var res []string
-	stockUrls := findElements(url, `.OMXH-list`, elements, collectHrefElements)
-	t := baseUrl + stockUrls[0]
-	test := findElements(t, `.list-item-wrapper`, `.stock-list-column > span, .stock-list-column > div > h5 > span`, collectAll)
+	stockUrls := findElements(url, mainContainer, mainElement, collectHrefElements)
+
+	//Fetch one stocks information
+	baseURL = os.Getenv("BASE_URL")
+	childContainer = os.Getenv("CHILD_CONTAINER")
+	childElement = os.Getenv("CHILD_ELEMENT")
+	t := baseURL + stockUrls[0]
+	test := findElements(t, childContainer, childElement, collectAll)
 	fmt.Println(test)
 }
 
