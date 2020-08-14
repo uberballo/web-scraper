@@ -1,5 +1,6 @@
 package util
 
+//SplitList reduced list into smaller chunks.
 func SplitList(list []string, size int) [][]string {
 	var res [][]string
 	var tempSlice []string

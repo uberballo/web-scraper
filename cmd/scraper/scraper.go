@@ -20,6 +20,7 @@ var childContainer string
 var childElement string
 var suffix string
 
+//Scrape finds data from the given url
 func Scrape(url string) {
 	fmt.Println(scrapeData(url))
 }
