@@ -24,24 +24,33 @@ func Scrape(url string) {
 }
 
 func scrapeData(url, suffix string) [][][]string {
-	mainContainer = os.Getenv("MAIN_CONTAINER")
-	mainElement = os.Getenv("MAIN_ELEMENT")
+	var res [][][]string
 
-	stockUrls := findElements(url, mainContainer, mainElement, collectHrefElements)
-	suffixStockUrls := appendSuffix(stockUrls, "/tilinpaatos")
+	urls := scrapeWebsite(url)
 
 	baseURL = os.Getenv("BASE_URL")
 	childContainer = os.Getenv("CHILD_CONTAINER")
 	childElement = os.Getenv("CHILD_ELEMENT")
-	var res [][][]string
 
-	for _, suffix := range suffixStockUrls {
+	suffixUrls := appendSuffix(urls, "/tilinpaatos")
+	shortList := suffixUrls[:5]
+
+	for _, suffix := range shortList {
 		singleStockURL := baseURL + suffix
 		stockInformation := findElements(singleStockURL, childContainer, childElement, collectAll)
 		splittedStockInformation := splitList(stockInformation)
 		res = append(res, splittedStockInformation)
 	}
 
+	return res
+}
+
+func scrapeWebsite(url string) []string {
+	var res []string
+	mainContainer = os.Getenv("MAIN_CONTAINER")
+	mainElement = os.Getenv("MAIN_ELEMENT")
+
+	res = findElements(url, mainContainer, mainElement, collectHrefElements)
 	return res
 }
 
