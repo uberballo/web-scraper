@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/uberballo/web-scraper/cmd/scraper"
@@ -9,8 +10,13 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func init() {
+	if err := godotenv.Load(".env"); err != nil {
+		log.Print("No .env file found")
+	}
+}
+
 func main() {
-	godotenv.Load(".env")
 	url := os.Getenv("MAIN_URL")
 	res := scraper.Scrape(url)
 	fmt.Println(res)
