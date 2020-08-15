@@ -19,6 +19,12 @@ var childContainer string
 var childElement string
 var suffix string
 
+type Stock struct {
+	Name       string
+	Symbol     string
+	KeyFigures []string
+}
+
 //Scrape finds data from the given url
 func Scrape(url string) [][][]string {
 	res := scrapeData(url)
@@ -37,7 +43,7 @@ func scrapeData(url string) [][][]string {
 
 	suffixUrls := util.AppendSuffix(urls, suffix)
 	workingUrls := util.PrependPrefix(suffixUrls, baseURL)
-	shortList := workingUrls[:5]
+	shortList := workingUrls[:1]
 
 	scrapedData := scrapeUrls(shortList, baseURL, childContainer, childElement)
 
@@ -52,14 +58,16 @@ func scrapeWebsite(url string) []string {
 	mainContainer = os.Getenv("MAIN_CONTAINER")
 	mainElement = os.Getenv("MAIN_ELEMENT")
 
-	res = findElements(url, mainContainer, mainElement, collectHrefElements)
+	collectFunctions := []func([]*cdp.Node) []string{collectHrefElements}
+	res = findElements(url, mainContainer, mainElement, collectFunctions)
 	return res
 }
 
 func scrapeUrls(list []string, baseURL, childContainer, childElement string) [][]string {
 	var res [][]string
+	collectFunctions := []func([]*cdp.Node) []string{collectAll}
 	for _, siteURL := range list {
-		stockInformation := findElements(siteURL, childContainer, childElement, collectAll)
+		stockInformation := findElements(siteURL, childContainer, childElement, collectFunctions)
 		res = append(res, stockInformation)
 	}
 	return res
@@ -101,7 +109,7 @@ func collectAll(nodes []*cdp.Node) []string {
 	return res
 }
 
-func findElements(url, containerElement, element string, collectFunction func([]*cdp.Node) []string) []string {
+func findElements(url, containerElement, element string, collectFunctions []func([]*cdp.Node) []string) []string {
 	var nodes []*cdp.Node
 	var err error
 
@@ -121,7 +129,9 @@ func findElements(url, containerElement, element string, collectFunction func([]
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	res := collectFunction(nodes)
+	var res []string
+	for _, function := range collectFunctions {
+		res = append(res, function(nodes)...)
+	}
 	return res
 }
