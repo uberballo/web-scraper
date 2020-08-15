@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -20,9 +21,8 @@ var childElement string
 var suffix string
 
 type Stock struct {
-	Name       string
 	Symbol     string
-	KeyFigures []string
+	KeyFigures [][]string
 }
 
 type ContainerAndElement struct {
@@ -31,14 +31,12 @@ type ContainerAndElement struct {
 }
 
 //Scrape finds data from the given url
-func Scrape(url string) [][][]string {
+func Scrape(url string) []Stock {
 	res := scrapeData(url)
 	return res
 }
 
-func scrapeData(url string) [][][]string {
-	var stocksKeyFigures [][][]string
-
+func scrapeData(url string) []Stock {
 	urls := scrapeWebsite(url)
 
 	baseURL = os.Getenv("BASE_URL")
@@ -52,10 +50,7 @@ func scrapeData(url string) [][][]string {
 
 	scrapedData := scrapeUrls(shortList, baseURL, childContainer, childElement)
 
-	for _, n := range scrapedData {
-		stocksKeyFigures = append(stocksKeyFigures, util.SplitList(n, 6))
-	}
-	return stocksKeyFigures
+	return scrapedData
 }
 
 func scrapeWebsite(url string) []string {
@@ -72,8 +67,9 @@ func scrapeWebsite(url string) []string {
 	return res
 }
 
-func scrapeUrls(list []string, baseURL, childContainer, childElement string) [][]string {
-	var res [][]string
+func scrapeUrls(list []string, baseURL, childContainer, childElement string) []Stock {
+	var res []Stock
+	var symbol string
 
 	collectFunctions := []func([]*cdp.Node) []string{collectAll}
 	childrenObjects := ContainerAndElement{
@@ -81,8 +77,11 @@ func scrapeUrls(list []string, baseURL, childContainer, childElement string) [][
 		[]string{childElement}}
 
 	for _, siteURL := range list {
+		symbol = util.GetLastPart(siteURL)
 		stockInformation := findElements(siteURL, childrenObjects, collectFunctions)
-		res = append(res, stockInformation)
+		splittedFigures := util.SplitList(stockInformation, 6)
+		newStock := Stock{symbol, splittedFigures}
+		res = append(res, newStock)
 	}
 	return res
 }
@@ -136,18 +135,18 @@ func findElements(url string, elements ContainerAndElement, collectFunctions []f
 
 		ctx, cancel := chromedp.NewContext(context.Background())
 		defer cancel()
-
+		var title string
 		err = chromedp.Run(ctx,
 			chromedp.Navigate(url),
 			chromedp.Nodes(elements.Element[i], &nodes, chromedp.ByQueryAll),
 		)
 
+		fmt.Println(title)
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, function := range collectFunctions {
-			res = append(res, function(nodes)...)
-		}
+		res = append(res, collectFunctions[i](nodes)...)
+
 	}
 	return res
 }
