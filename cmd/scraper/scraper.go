@@ -25,6 +25,11 @@ type Stock struct {
 	KeyFigures []string
 }
 
+type ContainerAndElement struct {
+	Container string
+	Element   string
+}
+
 //Scrape finds data from the given url
 func Scrape(url string) [][][]string {
 	res := scrapeData(url)
@@ -55,19 +60,22 @@ func scrapeData(url string) [][][]string {
 
 func scrapeWebsite(url string) []string {
 	var res []string
+
 	mainContainer = os.Getenv("MAIN_CONTAINER")
 	mainElement = os.Getenv("MAIN_ELEMENT")
+	mainObjects := ContainerAndElement{mainContainer, mainElement}
 
 	collectFunctions := []func([]*cdp.Node) []string{collectHrefElements}
-	res = findElements(url, mainContainer, mainElement, collectFunctions)
+	res = findElements(url, mainObjects, collectFunctions)
 	return res
 }
 
 func scrapeUrls(list []string, baseURL, childContainer, childElement string) [][]string {
 	var res [][]string
 	collectFunctions := []func([]*cdp.Node) []string{collectAll}
+	childrenObjects := ContainerAndElement{childContainer, childElement}
 	for _, siteURL := range list {
-		stockInformation := findElements(siteURL, childContainer, childElement, collectFunctions)
+		stockInformation := findElements(siteURL, childrenObjects, collectFunctions)
 		res = append(res, stockInformation)
 	}
 	return res
@@ -109,11 +117,11 @@ func collectAll(nodes []*cdp.Node) []string {
 	return res
 }
 
-func findElements(url, containerElement, element string, collectFunctions []func([]*cdp.Node) []string) []string {
+func findElements(url string, elements ContainerAndElement, collectFunctions []func([]*cdp.Node) []string) []string {
 	var nodes []*cdp.Node
 	var err error
 
-	err = visible(url, containerElement)
+	err = visible(url, elements.Container)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -123,7 +131,7 @@ func findElements(url, containerElement, element string, collectFunctions []func
 
 	err = chromedp.Run(ctx,
 		chromedp.Navigate(url),
-		chromedp.Nodes(element, &nodes, chromedp.ByQueryAll),
+		chromedp.Nodes(elements.Element, &nodes, chromedp.ByQueryAll),
 	)
 
 	if err != nil {
