@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+//AppendSuffix appends suffix
 func AppendSuffix(list []string, suffix string) []string {
 	var res []string
 	for _, n := range list {
@@ -13,6 +14,7 @@ func AppendSuffix(list []string, suffix string) []string {
 	return res
 }
 
+//PrependPrefix prepends prefix
 func PrependPrefix(list []string, prefix string) []string {
 	var res []string
 	for _, n := range list {
@@ -27,6 +29,8 @@ func removePartOfString(url, toRemove string) string {
 	return res
 }
 
+//GetLastPart Gets the last part of a url.
+// Eg. example/hello/part -> part
 func GetLastPart(url string) string {
 	re := regexp.MustCompile(`([^\/]+$)`)
 	trimmedURL := removePartOfString(url, "/tilinpaatos")

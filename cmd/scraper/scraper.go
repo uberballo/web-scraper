@@ -20,11 +20,13 @@ var childContainer string
 var childElement string
 var suffix string
 
+//Stock struct has the symbol and all found key figures.
 type Stock struct {
 	Symbol     string
 	KeyFigures [][]string
 }
 
+//ContainerAndElement contains strings that will point to the container element and to-be queried elements.
 type ContainerAndElement struct {
 	Container []string
 	Element   []string
