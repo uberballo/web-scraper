@@ -19,5 +19,5 @@ func init() {
 func main() {
 	url := os.Getenv("MAIN_URL")
 	res := scraper.Scrape(url)
-	fmt.Println(res)
+	fmt.Println(string(res))
 }

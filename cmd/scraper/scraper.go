@@ -2,7 +2,7 @@ package scraper
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"log"
 	"os"
 	"time"
@@ -20,6 +20,11 @@ var childContainer string
 var childElement string
 var suffix string
 
+//KeyFigures contains all Stocks and their key figures.
+type KeyFigures struct {
+	Stocks []Stock
+}
+
 //Stock struct has the symbol and all found key figures.
 type Stock struct {
 	Symbol     string
@@ -33,12 +38,24 @@ type ContainerAndElement struct {
 }
 
 //Scrape finds data from the given url
-func Scrape(url string) []Stock {
+func Scrape(url string) []byte {
 	res := scrapeData(url)
-	return res
+	jsonRes, err := toJSON(res)
+	if err != nil {
+		log.Print(err)
+	}
+	return jsonRes
 }
 
-func scrapeData(url string) []Stock {
+func toJSON(stocks KeyFigures) ([]byte, error) {
+	b, err := json.Marshal(stocks)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+func scrapeData(url string) KeyFigures {
 	urls := scrapeWebsite(url)
 
 	baseURL = os.Getenv("BASE_URL")
@@ -51,8 +68,9 @@ func scrapeData(url string) []Stock {
 	shortList := workingUrls[:1]
 
 	scrapedData := scrapeUrls(shortList, baseURL, childContainer, childElement)
+	result := KeyFigures{scrapedData}
 
-	return scrapedData
+	return result
 }
 
 func scrapeWebsite(url string) []string {
@@ -137,13 +155,12 @@ func findElements(url string, elements ContainerAndElement, collectFunctions []f
 
 		ctx, cancel := chromedp.NewContext(context.Background())
 		defer cancel()
-		var title string
+
 		err = chromedp.Run(ctx,
 			chromedp.Navigate(url),
 			chromedp.Nodes(elements.Element[i], &nodes, chromedp.ByQueryAll),
 		)
 
-		fmt.Println(title)
 		if err != nil {
 			log.Fatal(err)
 		}
