@@ -26,8 +26,8 @@ type Stock struct {
 }
 
 type ContainerAndElement struct {
-	Container string
-	Element   string
+	Container []string
+	Element   []string
 }
 
 //Scrape finds data from the given url
@@ -63,7 +63,9 @@ func scrapeWebsite(url string) []string {
 
 	mainContainer = os.Getenv("MAIN_CONTAINER")
 	mainElement = os.Getenv("MAIN_ELEMENT")
-	mainObjects := ContainerAndElement{mainContainer, mainElement}
+	mainObjects := ContainerAndElement{
+		[]string{mainContainer},
+		[]string{mainElement}}
 
 	collectFunctions := []func([]*cdp.Node) []string{collectHrefElements}
 	res = findElements(url, mainObjects, collectFunctions)
@@ -72,8 +74,12 @@ func scrapeWebsite(url string) []string {
 
 func scrapeUrls(list []string, baseURL, childContainer, childElement string) [][]string {
 	var res [][]string
+
 	collectFunctions := []func([]*cdp.Node) []string{collectAll}
-	childrenObjects := ContainerAndElement{childContainer, childElement}
+	childrenObjects := ContainerAndElement{
+		[]string{childContainer},
+		[]string{childElement}}
+
 	for _, siteURL := range list {
 		stockInformation := findElements(siteURL, childrenObjects, collectFunctions)
 		res = append(res, stockInformation)
@@ -118,28 +124,30 @@ func collectAll(nodes []*cdp.Node) []string {
 }
 
 func findElements(url string, elements ContainerAndElement, collectFunctions []func([]*cdp.Node) []string) []string {
+	var res []string
 	var nodes []*cdp.Node
 	var err error
 
-	err = visible(url, elements.Container)
-	if err != nil {
-		log.Fatal(err)
-	}
+	for i := range elements.Container {
+		err = visible(url, elements.Container[i])
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	ctx, cancel := chromedp.NewContext(context.Background())
-	defer cancel()
+		ctx, cancel := chromedp.NewContext(context.Background())
+		defer cancel()
 
-	err = chromedp.Run(ctx,
-		chromedp.Navigate(url),
-		chromedp.Nodes(elements.Element, &nodes, chromedp.ByQueryAll),
-	)
+		err = chromedp.Run(ctx,
+			chromedp.Navigate(url),
+			chromedp.Nodes(elements.Element[i], &nodes, chromedp.ByQueryAll),
+		)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-	var res []string
-	for _, function := range collectFunctions {
-		res = append(res, function(nodes)...)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, function := range collectFunctions {
+			res = append(res, function(nodes)...)
+		}
 	}
 	return res
 }
