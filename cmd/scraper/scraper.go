@@ -43,6 +43,7 @@ func Scrape(url string) KeyFigures {
 	return res
 }
 
+//ScrapeAsJSON returns scraped data as JSON
 func ScrapeAsJSON(url string) []byte {
 	res := scrapeData(url)
 	jsonRes, err := toJSON(res)
