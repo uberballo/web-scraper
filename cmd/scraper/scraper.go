@@ -65,7 +65,7 @@ func scrapeData(url string) KeyFigures {
 
 	suffixUrls := util.AppendSuffix(urls, suffix)
 	workingUrls := util.PrependPrefix(suffixUrls, baseURL)
-	shortList := workingUrls[:1]
+	shortList := workingUrls[:2]
 
 	scrapedData := scrapeUrls(shortList, baseURL, childContainer, childElement)
 	result := KeyFigures{scrapedData}
