@@ -38,7 +38,12 @@ type ContainerAndElement struct {
 }
 
 //Scrape finds data from the given url
-func Scrape(url string) []byte {
+func Scrape(url string) KeyFigures {
+	res := scrapeData(url)
+	return res
+}
+
+func ScrapeAsJSON(url string) []byte {
 	res := scrapeData(url)
 	jsonRes, err := toJSON(res)
 	if err != nil {
